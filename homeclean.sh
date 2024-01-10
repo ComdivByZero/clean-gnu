@@ -2,23 +2,25 @@
 
 OUTDATE_DAYS="$1"
 
+DO=1
+
 log() { echo "\033[1m[ $* ]\033[0m"; }
-run() { echo ';' "$@"; "$@"; echo; }
+run() { echo ';' "$@"; if [ "$DO" = 1 ]; then "$@"; echo; fi; }
 
 if command -v trash > /dev/null 2>&1; then
     remove()    { run trash $1; }
     after()     { log "Не забудьте очистить корзину, когда убедитесь, что всё в порядке"; }
-    alias noteTrash=""
+    noteTrash() { echo "Данные будут удалены в корзину с помощью trash"; }
 else
     remove()    { run rm -rf; }
     after()     { log "Данные были удалены сразу, но лучше установить trash-cli"; }
-    noteTrash() { echo "Установите пакет trash-cli, чтобы удаляло в корзину."; }
+    noteTrash() { echo "Установите trash-cli для удаления в корзину, а не сразу через rm."; }
 fi
 
 clean() {
     log "Удаление из $HOME/.cache/ каталогов с файлами старше $OUTDATE_DAYS дней или пустых"
-    for CACHE in $HOME/.cache/* $HOME/.cache/.*; do
-        if ! find "$CACHE" -type f -mtime -$OUTDATE_DAYS | grep -q .; then
+    for CACHE in $HOME/.cache/* $HOME/.cache/.?*; do
+        if [ "$CACHE" != ".." ] && ! find "$CACHE" -type f -mtime -$OUTDATE_DAYS 2>&1 | grep -q .; then
             remove "$CACHE"
         fi
     done
@@ -31,6 +33,9 @@ if ! echo "$1" | grep -qE '^[0-9]+$'; then
     noteTrash
     echo "Для очистки запустите с количеством дней устаревания содержимого, например"
     echo "   $0 42"
+    echo "Для просмотра команд очистки без их выполнения:"
+    echo "   $0 42 show"
 else
+    [ "$2" = show ] && DO=0
     clean
 fi

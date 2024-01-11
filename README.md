@@ -8,11 +8,12 @@ Shell-cкрипты для автоматической очистки сист�
 
 ## Установка
 
-   git clone https://github.com/ComdivByZero/clean-gnu.git --depth 1
+    /usr/bin/sudo apt install trash-cli # для удаления в корзину
+    git clone https://github.com/ComdivByZero/clean-gnu.git --depth 1
 
 ## Использование
 
     /usr/bin/sudo clean-gnu/rootclean.sh
     # параметр - количество дней устаревания кэша по самому свежему файлу
-    clean-gnu/homeclean.sh 321 
+    clean-gnu/homeclean.sh 321
 

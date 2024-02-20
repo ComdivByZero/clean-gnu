@@ -4,7 +4,7 @@ OUTDATE_DAYS="$1"
 
 DO=1
 
-log() { echo "\033[1m[ $* ]\033[0m"; }
+log() { env echo -e "\033[1m[ $* ]\033[0m"; }
 run() { echo ';' "$@"; if [ "$DO" = 1 ]; then "$@"; echo; fi; }
 
 if command -v trash > /dev/null 2>&1; then

@@ -1,16 +1,23 @@
 #!/bin/sh
 
 JOURNAL_SIZE=101M
-OUTDATE_DAYS=17
+OUTDATE_CACHE=17
+OUTDATE_LOGS=111
 
 DO=1
 
-log() { echo "\033[1m[ $* ]\033[0m"; }
+log() { env echo -e "\033[1m[ $* ]\033[0m"; }
 run() { echo ';' "$@"; if [ "$DO" = 1 ]; then "$@"; echo; fi; }
 
 clean() {
     log "Урезание системного лога до $JOURNAL_SIZE"
     run journalctl --vacuum-size=$JOURNAL_SIZE
+
+    log "Удаление файлов в /var/log/ старше $OUTDATE_LOGS дней"
+    find /var/log -type f -mtime +$OUTDATE_LOGS |
+        while read -r file; do
+            run rm -f $file
+        done
 
     log "Удаление deb-пакетов — устаревших зависимостей"
     run apt autoclean
@@ -28,9 +35,9 @@ clean() {
             done
     fi
 
-    log "Удаление каталогов из /var/cache старше $OUTDATE_DAYS дней"
+    log "Удаление каталогов из /var/cache старше $OUTDATE_CACHE дней"
     for CACHE in /var/cache/*; do
-        if ! find "$CACHE" -type f -mtime -$OUTDATE_DAYS | grep -q .; then
+        if ! find "$CACHE" -type f -mtime -$OUTDATE_CACHE | grep -q .; then
             run rm -rf "$CACHE"
         fi
     done

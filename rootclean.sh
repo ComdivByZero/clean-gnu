@@ -16,12 +16,12 @@ clean() {
     log "Удаление файлов в /var/log/ старше $OUTDATE_LOGS дней"
     find /var/log -type f -mtime +$OUTDATE_LOGS |
         while read -r file; do
-            run rm -f $file
+            run rm -f "$file"
         done
 
     log "Удаление deb-пакетов — устаревших зависимостей"
-    run apt autoclean
     run apt autoremove
+    run apt autoclean
 
     log "Удаление кэша deb-пакетов"
     run apt clean
@@ -30,7 +30,7 @@ clean() {
         log "Удаление выключенных ревизий snap-пакетов"
         echo '; snap list --all'
         LANG=C snap list --all | awk '/disabled/{print $1, $3}' |
-            while read snapname revision; do
+            while read -r snapname revision; do
                 run snap remove "$snapname" --revision="$revision"
             done
     fi

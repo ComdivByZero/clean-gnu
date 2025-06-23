@@ -22,7 +22,7 @@ clean() {
     log "Удаление из $HOME/.cache/ каталогов с файлами старше $OUTDATE_DAYS дней или пустых"
     for CACHE in "$HOME"/.cache/* "$HOME"/.cache/.?*; do
         if [ "$CACHE" != ".." ] && ! find "$CACHE" -type f -atime -"$OUTDATE_DAYS" 2>&1 | grep -q .; then
-            echo_param="$(du -h --summarize $CACHE | awk '{print $1}')";
+            echo_param="$(du -h --summarize "$CACHE" | awk '{print $1}')";
             remove "$CACHE"
         fi
     done

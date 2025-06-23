@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-old_kernel_keep_days=30
+clean() {
+  #local keep_days now purge_list current_kernel kernel_pkgs vmlinuz_path timestamp age pkg version
 
-remove_old_kernels() {
-  local now purge_list current_kernel kernel_pkgs vmlinuz_path timestamp age pkg version
+  keep_days=$1
 
   now=$(date +%s)
   purge_list=''
@@ -22,7 +22,7 @@ remove_old_kernels() {
         timestamp=$(stat -c %Y "$vmlinuz_path")
         age=$(( (now - timestamp) / 86400 ))
 
-        if [ "$age" -gt "$old_kernel_keep_days" ]; then
+        if [ "$age" -gt "$keep_days" ]; then
           purge_list="$purge_list $pkg"
         fi
       fi
@@ -31,8 +31,16 @@ remove_old_kernels() {
 
   if [ -n "$purge_list" ]; then
     echo "Текущее ядро — $current_kernel"
-    /usr/bin/sudo apt purge $purge_list
+    echo /usr/bin/sudo apt purge $purge_list
   fi
 }
 
-remove_old_kernels
+
+if ! echo "$1" | grep -qE '^[0-9]+$'; then
+  echo Очистка старых версий ядра Linux.
+elif [ "$(id -u)" -ne 0 ]; then
+  echo "Необходимо запускать от суперпользователя:"
+  echo "    /usr/bin/sudo $0 $1"
+else
+  clean "$1"
+fi
